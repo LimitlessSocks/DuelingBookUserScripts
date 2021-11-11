@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         DuelingBook Extra Button Functionality
 // @namespace    http://limitlesssocks.github.io/
-// @version      0.1
+// @version      0.2
 // @description  Adds extra buttons to DuelingBook cards based on PSCT
 // @author       Sock#3222
 // @match        https://www.duelingbook.com/*
 // @icon         https://www.google.com/s2/favicons?domain=duelingbook.com
 // @grant        none
+// @downloadURL  https://github.com/LimitlessSocks/DuelingBookUserScripts/raw/main/ExtraButtons/db-extra-buttons.user.js
+// @updateURL    https://github.com/LimitlessSocks/DuelingBookUserScripts/raw/main/ExtraButtons/db-extra-buttons.user.js
 // ==/UserScript==
 
 const DEBF = {};
