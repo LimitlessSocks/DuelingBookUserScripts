@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DuelingBook Extra Button Functionality
 // @namespace    http://limitlesssocks.github.io/
-// @version      0.4
+// @version      0.5
 // @description  Adds extra buttons to DuelingBook cards based on PSCT
 // @author       Sock#3222
 // @match        https://www.duelingbook.com/*
@@ -72,10 +72,10 @@ const load = async function() {
             }
         }
         for (let card of cards) {
-            if(needsFaceUp && card.data("face_down")) {
+            if(!card || (needsFaceUp && card.data("face_down"))) {
                 continue;
             }
-            if (card && fn(card)) {
+            if(fn(card)) {
                 return true;
             }
         }
