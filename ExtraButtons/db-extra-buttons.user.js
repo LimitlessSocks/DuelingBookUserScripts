@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DuelingBook Extra Button Functionality
 // @namespace    http://limitlesssocks.github.io/
-// @version      0.2
+// @version      0.4
 // @description  Adds extra buttons to DuelingBook cards based on PSCT
 // @author       Sock#3222
 // @match        https://www.duelingbook.com/*
@@ -14,9 +14,14 @@
 const DEBF = {};
 window.DEBF = DEBF;
 DEBF.pollingRate = 100; // ms
+DEBF.waiting = null;
+DEBF.RESOURCE_START = "https://raw.githubusercontent.com/LimitlessSocks/DuelingBookUserScripts/main/res/";
+DEBF.resource = (name) => DEBF.RESOURCE_START + name;
 DEBF.waitUntilLoaded = (varname) => new Promise((resolve, reject) => {
+    DEBF.waiting = true;
     let recur = () => {
         if(typeof window[varname] !== "undefined") {
+            DEBF.waiting = false;
             resolve();
         }
         else {
@@ -25,14 +30,24 @@ DEBF.waitUntilLoaded = (varname) => new Promise((resolve, reject) => {
     };
     recur();
 });
+DEBF.tags = new Map([
+    ["DEBF",
+        option => option.find("img").attr("src", DEBF.resource("card_menu_btn_up3.svg"))
+    ]
+]);
 
 const load = async function() {
+    const bootstrap = (fn, name, where, what) => {
+        let body = fn.toString();
+        body = body.replace(where, what);
+        return eval(body + "; " + name);
+    };
     // ASSUMPTION: showMenu is the last called thing in cardMenuE.
     console.log("DEBF loaded");
     await DEBF.waitUntilLoaded("cardMenuE");
     console.log("cardMenuE defined, overwriting");
 
-    const oldCardMenuE = cardMenuE;
+    // const oldCardMenuE = cardMenuE;
 
     const hasText = (card, text) =>
         card.data("cardfront").data("effect").search(text) !== -1;
@@ -41,10 +56,10 @@ const load = async function() {
         if(menu.some(({ data }) => data === option.data)) {
             return;
         }
-        menu.unshift(option);
+        menu.unshift(Object.assign({tag:"DEBF"}, option));
     };
 
-    const findEffectAdvanced = (fn) => {
+    const findEffectAdvanced = (fn, needsFaceUp = true) => {
         if(typeof fn !== "function") {
             let dat = fn;
             fn = (card) => hasText(card, dat);
@@ -57,6 +72,9 @@ const load = async function() {
             }
         }
         for (let card of cards) {
+            if(needsFaceUp && card.data("face_down")) {
+                continue;
+            }
             if (card && fn(card)) {
                 return true;
             }
@@ -69,7 +87,8 @@ const load = async function() {
         let setField = false;
         let banishFaceDown = false;
         let placeTopOfDeckFU = false;
-
+        let enablesAllDefenseAttack = false;
+        
         // activate/set field checks //
         placeField = placeField || hasText(card, /place (this banished card|this card (you control|from your (\w+))) in your Field/);
         setField = setField || hasText(card, /Set (this banished card|this card (you control|from your (\w+))) to your Field/);
@@ -78,10 +97,14 @@ const load = async function() {
         placeOrSetField = placeOrSetField || hasText(card, /(place or Set|Set or place) (this banished card|this card from your (\w+)) (in|to) your Field/);
 
         // banish face-down checks //
-        banishFaceDown = banishFaceDown || findEffectAdvanced(card => hasText(card, "face-down") && hasText(card, "banish"), true, true, true);
+        banishFaceDown = banishFaceDown || findEffectAdvanced(card => hasText(card, "face-down") && hasText(card, "banish"), true);
         
         // top of deck face-up checks //
-        placeTopOfDeckFU = placeTopOfDeckFU || findEffectAdvanced(card => (hasText(card, /top of.*Deck/i) || hasText(card, /shuffle.*Deck/i)) && hasText(card, /face-up/), true, true, true);
+        placeTopOfDeckFU = placeTopOfDeckFU || findEffectAdvanced(card => (hasText(card, /top of.*Deck/i) || hasText(card, /shuffle.*Deck/i)) && hasText(card, /face-up/), true);
+        
+		if(currentPhase == "BP" && turn_player.username == username && !card.data("face_down") && isMonster(player1, card)) {
+            enablesAllDefenseAttack = enablesAllDefenseAttack || findEffectAdvanced(card => hasText(card, /monsters you control can attack while in(?: face-up)? Defense Position/), true);
+        }
         
         // various combination checks //
         placeField = placeField || placeOrSetField;
@@ -103,13 +126,20 @@ const load = async function() {
             addButtonIfNew(menu, {label:"To Top of Deck face-up",data:"To T Deck FU"});
             addButtonIfNew(menu, {label:"To Top of opponent's Deck face-up",data:"To T Deck 2 FU"});
         }
+        if(enablesAllDefenseAttack) {
+            if (countMonsters(player2) > 0) {
+                addButtonIfNew(menu, {label:"Attack",data:"Attack"});
+            }
+            addButtonIfNew(menu, {label:"Attack Directly",data:"Attack directly"});
+        }
     };
     DEBF.newBehavior = newBehavior;
 
-    let body = oldCardMenuE.toString();
-    body = body.replace(/showMenu\(card, menu\);/, "DEBF.newBehavior(card, menu);\n$&");
-    //console.log(body);
+    // let cardMenuBody = oldCardMenuE.toString();
+    // cardMenuBody = cardMenuBody.replace(/showMenu\(card, menu\);/, "DEBF.newBehavior(card, menu);\n$&");
+    // cardMenuE = eval(cardMenuBody + "; cardMenuE");
+    cardMenuE = bootstrap(cardMenuE, "cardMenuE", /showMenu\(card, menu\);/, "DEBF.newBehavior(card, menu);\n$&");
+    showMenu = bootstrap(showMenu, "showMenu", /addButton\(option\);/, "$&;\n		if(DEBF.tags.has(dp[i].tag)) DEBF.tags.get(dp[i].tag)(option);\n		else ");
 
-    cardMenuE = eval(body + "; cardMenuE");
 };
 window.addEventListener("load", load);
