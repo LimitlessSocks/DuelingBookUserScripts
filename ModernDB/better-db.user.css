@@ -1,0 +1,217 @@
+/* ==UserStyle==
+@name           Better DB User CSS
+@namespace      duelingbook.com
+@version        1.1.0
+@description    Modernizing duelingbook
+@author         Sock#3222
+@updateURL      https://github.com/LimitlessSocks/DuelingBookUserScripts/raw/main/ModernDB/better-db.user.css
+@license        CC-BY-SA-4.0
+==/UserStyle== */
+
+@-moz-document domain("duelingbook.com") {
+    @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@300;600&family=Heebo:wght@300;700&family=Montserrat:wght@400;700&family=Open+Sans:ital,wght@0,400;0,700;1,400&family=Squada+One&display=swap'); /*' comment to make some syntax highlighters play nice;*/
+    
+    :root {
+        --display-font: "Heebo", sans-serif;
+        --header-font: "Squada One", "Montserrat", sans-serif;
+        --main-font: "Open Sans", sans-serif;
+        
+        --main-color: rgb(188, 225, 236);
+        --main-color-highlighted: rgb(144, 229, 255); /*rgb(164, 237, 255);*/
+        --danger-color: rgb(236, 188, 214);
+        --danger-color-highlighted: rgb(255, 144, 187); /*rgb(164, 237, 255);*/
+        --background-frame: rgb(75, 150, 154);
+        --background-frame-light: rgb(101, 202, 207);
+        --background-frame-lighter: rgb(114, 231, 237);
+    }
+
+    .uploader .background, #search, #edit_card .background {
+        background-color: var(--background-frame);
+    }
+    #search_mask {
+        background-color: var(--background-frame-light);
+    }
+    .bypass_background {
+        background-color: var(--background-frame-lighter);
+    }
+
+    .format .format_txt {
+        top: -26px;
+    }
+    .username_lbl {
+        top: 24px !important;
+    }
+
+    #host_bg {
+        background-color: rgba(54, 204, 0, 0.6);
+    }
+    #mode {
+        background-color: rgba(102, 0, 204, 0.6);
+        height: 80px;
+    }
+    #filter {
+        background-color: rgba(0, 153, 255, 0.6);
+        height: 140px;
+    }
+    #decklist {
+        background-color: rgba(255, 51, 0, 0.6);
+        height: 80px;
+    }
+    #host_bg, #mode, #filter, #decklist {
+        border-radius: 10px;
+    }
+    #host_bg > img, #filter > img, #mode > img, #decklist > img, #search > img {
+        display: none;
+    }
+    #host_lbl, .host_lbl, #filter_lbl, #mode_lbl, #decklist > span {
+        top: -15px;
+    }
+
+    .title_txt.aliased {
+        top: -3px;
+    }
+
+    body, select, option, .combobox, #profile_viewer, #profile_viewer2 {
+        font-family: var(--main-font);
+    }
+    .arial_black2, .title1, .title2, .subtitle, .kristenitc {
+        font-weight: 600;
+        font-family: var(--header-font);
+    }
+    .status .username_txt, .tourney, .tourney_link, .arial_rounded18,
+    #msg, #confirm, #confirm2, #input, #combo {
+        font-weight: 500;
+        font-family: var(--display-font);
+    }
+    .status, .status textarea, #post_status_btn  {
+        font-family: var(--main-font);
+    }
+    .status .username_txt {
+        color: rgb(35, 160, 191);
+        font-size: 24px;
+    }
+    .kristenitc {
+        padding-top: 10px;
+    }
+
+    #msg, #confirm, #confirm2, #input, #combo {
+        background: rgb(9, 42, 50);
+        border: 5px solid rgb(19, 86, 102);
+        border-radius: 35px;
+    }
+
+    #tourney_sidebar .subtitle_txt, #streams .subtitle_txt {
+        text-align: left;
+    }
+    #tourneys .subtitle, .tourney .name_txt {
+        top: -5px;
+    }
+
+    #search span, #upload_card span, #edit_card span {
+        padding-top: 0;
+    }
+
+    .attrib_lbl, .limit_lbl, .level_lbl, .name_lbl {
+        letter-spacing: -0.5px;
+    }
+
+    .combobox, input, .textinput, textarea, .ok_btn, .cancel_btn {
+        background: var(--main-color);
+        transition: 0.1s background;
+        border: none;
+    }
+    .combobox.combobox_selected, input, .ok_btn:hover, .cancel_btn:hover {
+        background: var(--main-color-highlighted);
+    }
+    .combobox_line {
+        display: none;
+    }
+    .button {
+        background: var(--main-color);
+        transition: 0.1s background;
+        font-family: var(--main-font);
+        font-weight: 300;
+        font-size: 12px;
+        border: none;
+    }
+    .button.disabled {
+        background: rgb(35, 160, 191);
+    }
+    .button.button_selected {
+        background: var(--main-color-highlighted);
+    }
+    .delete_btn + .button {
+        background: var(--danger-color);
+    }
+    .delete_btn + .button.button_selected {
+        background: var(--danger-color-highlighted);
+    }
+
+    .ok_btn img, .cancel_btn img, .yes_btn img, .no_btn img {
+        display: none;
+    }
+    
+    .yes_btn, .no_btn {
+        background-color: var(--main-color);
+    }
+    .yes_btn:hover, .no_btn:hover {
+        background-color: var(--main-color-highlighted);
+    }
+    .ok_btn::before, .cancel_btn::before, .yes_btn::before, .no_btn::before {
+        content: "OK";
+        width: 100%;
+        position: relative;
+        top: 14px;
+        display: block;
+        font-size: 36px;
+        text-align: center;
+    }
+    .cancel_btn::before {
+        content: "CANCEL";
+    }
+    .yes_btn::before {
+        content: "YES";
+    }
+    .no_btn::before {
+        content: "NO";
+    }
+    .page_txt {
+        left: -5px;
+    }
+    #search .page2_txt {
+        left: 98px;
+    }
+    #search .tot_pages_txt {
+        left: 108px;
+    }
+
+    .lifepoints .life_txt {
+        top: 1px;
+    }
+
+    .menu_btn {
+        font-weight: 300;
+        font-family: var(--header-font);
+        font-size: 32px;
+    }
+
+    .menu_btn {
+        border-radius: 5px;
+        height: 56px;
+        background-color: rgba(35, 160, 191, 0.5);
+        transition: 0.2s background-color;
+    }
+    .menu_btn:hover {
+        background-color: rgba(86, 221, 255, 0.7);
+    }
+    .menu_btn > span {
+        padding-top: 18px;
+    }
+    .menu_btn > img {
+        display: none;
+    }
+    #tournament_btn > span {
+        padding-top: 10px;
+    }
+    
+}
