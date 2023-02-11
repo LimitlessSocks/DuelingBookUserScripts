@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         DuelingBook Calculator
 // @namespace    http://limitlesssocks.github.io/
-// @version      0.2.1
+// @version      0.2.2
 // @description  A calculator extension
 // @author       Sock#3222
-// @match        https://www.duelingbook.com/html5
+// @match        https://www.duelingbook.com/*
 // @grant        none
 // @updateURL    https://github.com/LimitlessSocks/DuelingBookUserScripts/raw/main/Calculator/calculator.user.css
 // @license      CC-BY-SA-4.0

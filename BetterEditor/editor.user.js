@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         DuelingBook Custom Editor Expansions
 // @namespace    http://limitlesssocks.github.io/
-// @version      0.1.1
+// @version      0.1.2
 // @description  Making custom card editing not a pain.
 // @author       Sock#3222
-// @match        https://www.duelingbook.com/html5
+// @match        https://www.duelingbook.com/*
 // @grant        none
 // @updateURL    https://github.com/LimitlessSocks/DuelingBookUserScripts/raw/main/BetterEditor/editor.user.css
 // @license      CC-BY-SA-4.0
