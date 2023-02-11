@@ -1,145 +1,238 @@
 // ==UserScript==
 // @name         DuelingBook Extra Button Functionality
 // @namespace    http://limitlesssocks.github.io/
-// @version      0.5
+// @version      1.0
 // @description  Adds extra buttons to DuelingBook cards based on PSCT
 // @author       Sock#3222
 // @match        https://www.duelingbook.com/*
 // @icon         https://www.google.com/s2/favicons?domain=duelingbook.com
 // @grant        none
+// ==/UserScript==
 // @downloadURL  https://github.com/LimitlessSocks/DuelingBookUserScripts/raw/main/ExtraButtons/db-extra-buttons.user.js
 // @updateURL    https://github.com/LimitlessSocks/DuelingBookUserScripts/raw/main/ExtraButtons/db-extra-buttons.user.js
-// ==/UserScript==
 
-const DEBF = {};
+const DEBF = {
+    target: { data(id) {console.log(id)}},
+};
 window.DEBF = DEBF;
-DEBF.pollingRate = 100; // ms
-DEBF.waiting = null;
-DEBF.RESOURCE_START = "https://raw.githubusercontent.com/LimitlessSocks/DuelingBookUserScripts/main/res/";
-DEBF.resource = (name) => DEBF.RESOURCE_START + name;
-DEBF.waitUntilLoaded = (varname) => new Promise((resolve, reject) => {
-    DEBF.waiting = true;
-    let recur = () => {
-        if(typeof window[varname] !== "undefined") {
-            DEBF.waiting = false;
-            resolve();
-        }
-        else {
-            setTimeout(recur, DEBF.pollingRate);
-        }
-    };
-    recur();
-});
-DEBF.tags = new Map([
-    ["DEBF",
-        option => option.find("img").attr("src", DEBF.resource("card_menu_btn_up3.svg"))
-    ]
-]);
 
 const load = async function() {
-    const bootstrap = (fn, name, where, what) => {
-        let body = fn.toString();
-        body = body.replace(where, what);
-        return eval(body + "; " + name);
+    console.log("debf: loaded");
+    
+    $("head").append($("<style>").text(`
+        #expand-dish {
+            position: absolute;
+            right: 0px;
+            bottom: 183.5px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 10px;
+            z-index: 30;
+            border: 4px solid #15A;
+            z-index: 51;
+        }
+        #expand-dish.minimize {
+            position: fixed;
+            top: 10px;
+            left: 530px;
+        }
+        #expand-dish:hover {
+            border-color: #37C;
+        }
+        #button-dish * {
+            position: static;
+        }
+        #button-dish h2 {
+            margin: 0;
+        }
+        #button-dish button {
+            margin: 3px;
+        }
+        #button-dish {
+            position: fixed;
+            display: none;
+            top: 10px;
+            left: 10px;
+            width: 550px;
+            height: 250px;
+            padding: 12px;
+            font-size: 12px;
+            background: white;
+            color: black;
+            border: 4px solid #15A;
+            border-radius: 10px;
+            user-select: text;
+            z-index: 50;
+            overflow-y: auto;
+        }
+        .debf-target {
+            filter: brightness(1.5) drop-shadow(0px 0px 30px white);
+        }
+    `));
+    const expandDish = $("<button id=expand-dish>");
+    const dish = $("<div id=button-dish>");
+    
+    const dataList = [
+        { header: "Conventional" },
+        { label: "Banish FD", data: "Banish FD" },
+        { label: "To ED", data: "To ED" },
+        { label: "To ED FU", data: "To ED FU" },
+        { label: "To deck (Bottom)", data: "To B Deck" },
+        { label: "Target", data: "Target" },
+        { label: "Randomly add 3 revealed", data: "Crescent effect" },
+        
+        { header: "Deck" },
+        { label: "To Opp's Deck (Top)", data: "To T Deck 2" },
+        { label: "To Opp's Deck (Bottom)", data: "To B Deck 2" },
+        { label: "To Deck (Top FU)", data: "To T Deck FU" },
+        { label: "To Opp's Deck (Top FU)", data: "To T Deck 2 FU" },
+        
+        { header: "Field Zone" },
+        { label: "Place in Field Zone", data: "Activate Field Spell" },
+        { label: "Set in Field Zone", data: "Set Field Spell" },
+        { label: "Set Field Zone (opponent's)", data: "Set Field Spell 2" },
+        { label: "Place Field Zone (opponent's)", data: "Activate Field Spell 2" },
+        
+        { header: "Spell & Trap Zones" },
+        { label: "Activate S/T", data: "Activate ST" },
+        { label: "To S/T", data: "To ST" },
+        { label: "Set S/T", data: "Set ST" },
+        { label: "Set to Monster Zone", data: "Set monster" },
+        { label: "Scale left", data: "Activate Pendulum Left" },
+        { label: "Scale right", data: "Activate Pendulum Right" },
+        
+        { header: "Monster Zones" },
+        { label: "NS", data: "Normal Summon" },
+        { label: "SS ATK", data: "SS ATK" },
+        { label: "SS DEF", data: "SS DEF" },
+        { label: "Move", data: "Move" },
+        
+        { header: "Special" },
+        { label: "Extrav(3)", data: "Banish 3 random ED cards FD" },
+        { label: "Mill difference", data: "Mill difference" },
+        { label: "Exchange", data: "Exchange event" },
+        
+        { header: "Unsorted" },
+        { label: "Peek Opp's top 5", data: "Telescope event" },
+        // { label: "", data: "Random extra event" },
+        // { label: "Banish random FD ED card FU", data: "Banish random ED card 2" },
+        
+        // unused
+        { label: "", data: "Banish" },
+        { label: "", data: "To GY" },
+        { label: "", data: "Attack" },
+        { label: "", data: "Attack directly" },
+        { label: "", data: "Activate Pendulum" },
+        { label: "", data: "OL ATK" },
+        { label: "", data: "OL DEF" },
+        { label: "", data: "Remove Token" },
+        { label: "", data: "To ATK" },
+        { label: "", data: "To DEF" },
+        { label: "", data: "Change control" },
+        { label: "", data: "To hand" },
+        { label: "", data: "Declare" },
+        { label: "", data: "Flip Summon" },
+        { label: "", data: "Flip" },
+        { label: "", data: "Detach" },
+        { label: "", data: "To T Deck" },
+        { label: "", data: "Overlay" },
+        { label: "", data: "To ST" },
+        { label: "", data: "Reveal" },
+        { label: "", data: "Spyral event" },
+        { label: "", data: "Dominance event" },
+        { label: "", data: "Zolga event" },
+        { label: "", data: "Peony event" },
+        { label: "", data: "Banish random ED card" },
+        { label: "", data: "Tincan effect" },
+        { label: "", data: "Crescent effect" },
+        { label: "", data: "Banish top 3 cards" },
+        { label: "", data: "Redoer event" },
+        { label: "", data: "Necroface event" },
+        { label: "", data: "Banish top 10 cards FD" },
+        { label: "", data: "Banish 6 random ED cards FD" },
+        { label: "", data: "Oracle event" },
+        { label: "", data: "Page-Flip effect" },
+        { label: "", data: "Senri event" },
+        { label: "", data: "Fate effect" },
+        { label: "", data: "To hand 2" },
+        // { label: "RPS", data: "Play RPS" },
+        { label: "", data: "Banish random Fusion card" },
+        { label: "", data: "Lilith effect" },
+        { label: "", data: "Alphan effect" },
+        { label: "", data: "Banish top 8 cards FD" },
+        { label: "", data: "Cynet Storm" },
+        { label: "", data: "View top card 2" },
+        { label: "", data: "Choose card" },
+        { label: "", data: "Activate Skill" },
+        { label: "", data: "Set Skill" },
+        { label: "", data: "Necklace event" },
+        { label: "", data: "Swap" },
+    ];
+    
+    const removeOldTarget = () => {
+        if(DEBF.target.data("cardfront")) {
+            DEBF.target.data("cardfront").removeClass("debf-target");
+        }
     };
-    // ASSUMPTION: showMenu is the last called thing in cardMenuE.
-    console.log("DEBF loaded");
-    await DEBF.waitUntilLoaded("cardMenuE");
-    console.log("cardMenuE defined, overwriting");
-
-    // const oldCardMenuE = cardMenuE;
-
-    const hasText = (card, text) =>
-        card.data("cardfront").data("effect").search(text) !== -1;
-
-    const addButtonIfNew = (menu, option) => {
-        if(menu.some(({ data }) => data === option.data)) {
+    
+    for(let { label, header, data } of dataList) {
+        if(header) {
+            let h = $("<h2>");
+            h.text(header);
+            dish.append(h);
+        }
+        else if(label) {
+            let button = $("<button>");
+            button.click(() => {
+                cardMenuClicked(DEBF.target, data, null);
+                removeOldTarget();
+                toggleDish();
+            });
+            button.text(label);
+            dish.append(button);
+        }
+    }
+    
+    const toggleDish = () => {
+        dish.toggle();
+        expandDish.toggleClass("minimize");
+    };
+    
+    expandDish.text("☢️");
+    expandDish.click(toggleDish);
+    expandDish.keydown(() => {
+        // $("#duel input.cin_txt").focus();
+    });
+    $("#duel").append(expandDish);
+    $("#duel").append(dish);
+    $("body").click((ev) => {
+        console.log(ev);
+        console.log("target:", window.target = ev.target);
+        let target = ev.target;
+        while(target && !target.classList.contains("card")) {
+            target = target.parentElement;
+        }
+        if(!target) {
             return;
         }
-        menu.unshift(Object.assign({tag:"DEBF"}, option));
-    };
-
-    const findEffectAdvanced = (fn, needsFaceUp = true) => {
-        if(typeof fn !== "function") {
-            let dat = fn;
-            fn = (card) => hasText(card, dat);
+        let card = $(target);
+        if(!card.is(DEBF.target)) {
+            removeOldTarget();
+            DEBF.target = card;
+            DEBF.target.data("cardfront").addClass("debf-target");
         }
-        var cards = [player1.m1, player1.m2, player1.m3, player1.m4, player1.m5, player1.s1, player1.s2, player1.s3, player1.s4, player1.s5, player1.pendulumLeft, player1.pendulumRight, player1.fieldSpell, player2.m1, player2.m2, player2.m3, player2.m4, player2.m5, player2.s1, player2.s2, player2.s3, player2.s4, player2.s5, player2.pendulumLeft, player2.pendulumRight, player2.fieldSpell, linkLeft, linkRight, player1.skillCard, player2.skillCard];
-        var arr = [player1.hand_arr, player1.grave_arr, player1.banished_arr, player1.opponent.grave_arr, player1.opponent.banished_arr];
-        for (var i = 0; i < arr.length; i++) {
-            for (var j = 0; j < arr[i].length; j++) {
-                cards.push(arr[i][j]);
-            }
+        else {
+            DEBF.target.data("cardfront").toggleClass("debf-target");
         }
-        for (let card of cards) {
-            if(!card || (needsFaceUp && card.data("face_down"))) {
-                continue;
-            }
-            if(fn(card)) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    let newBehavior = (card, menu) => {
-        let placeField = false;
-        let setField = false;
-        let banishFaceDown = false;
-        let placeTopOfDeckFU = false;
-        let enablesAllDefenseAttack = false;
-        
-        // activate/set field checks //
-        placeField = placeField || hasText(card, /place (this banished card|this card (you control|from your (\w+))) in your Field/);
-        setField = setField || hasText(card, /Set (this banished card|this card (you control|from your (\w+))) to your Field/);
-
-        let placeOrSetField = false;
-        placeOrSetField = placeOrSetField || hasText(card, /(place or Set|Set or place) (this banished card|this card from your (\w+)) (in|to) your Field/);
-
-        // banish face-down checks //
-        banishFaceDown = banishFaceDown || findEffectAdvanced(card => hasText(card, "face-down") && hasText(card, "banish"), true);
-        
-        // top of deck face-up checks //
-        placeTopOfDeckFU = placeTopOfDeckFU || findEffectAdvanced(card => (hasText(card, /top of.*Deck/i) || hasText(card, /shuffle.*Deck/i)) && hasText(card, /face-up/), true);
-        
-		if(currentPhase == "BP" && turn_player.username == username && !card.data("face_down") && isMonster(player1, card)) {
-            enablesAllDefenseAttack = enablesAllDefenseAttack || findEffectAdvanced(card => hasText(card, /monsters you control can attack while in(?: face-up)? Defense Position/), true);
-        }
-        
-        // various combination checks //
-        placeField = placeField || placeOrSetField;
-        setField = setField || placeOrSetField;
-
-        // add da buttons //
-        if(!player1.fieldSpell && !isMonster(player1, card) && !isST(player1, card)) {
-            if(placeField) {
-                addButtonIfNew(menu, {label:"Activate to Field Zone",data:"Activate Field Spell"});
-            }
-            if(setField) {
-                addButtonIfNew(menu, {label:"Set to Field Zone",data:"Set Field Spell"});
-            }
-        }
-        if(banishFaceDown) {
-            addButtonIfNew(menu, {label:"Banish FD",data:"Banish FD"});
-        }
-        if(!card.data("face_down") && placeTopOfDeckFU) {
-            addButtonIfNew(menu, {label:"To Top of Deck face-up",data:"To T Deck FU"});
-            addButtonIfNew(menu, {label:"To Top of opponent's Deck face-up",data:"To T Deck 2 FU"});
-        }
-        if(enablesAllDefenseAttack) {
-            if (countMonsters(player2) > 0) {
-                addButtonIfNew(menu, {label:"Attack",data:"Attack"});
-            }
-            addButtonIfNew(menu, {label:"Attack Directly",data:"Attack directly"});
-        }
-    };
-    DEBF.newBehavior = newBehavior;
-
-    // let cardMenuBody = oldCardMenuE.toString();
-    // cardMenuBody = cardMenuBody.replace(/showMenu\(card, menu\);/, "DEBF.newBehavior(card, menu);\n$&");
-    // cardMenuE = eval(cardMenuBody + "; cardMenuE");
-    cardMenuE = bootstrap(cardMenuE, "cardMenuE", /showMenu\(card, menu\);/, "DEBF.newBehavior(card, menu);\n$&");
-    showMenu = bootstrap(showMenu, "showMenu", /addButton\(option\);/, "$&;\n		if(DEBF.tags.has(dp[i].tag)) DEBF.tags.get(dp[i].tag)(option);\n		else ");
-
+    });
 };
-window.addEventListener("load", load);
+
+if(document.readyState === "complete") {
+    console.log("debf: document already loaded");
+    load();
+}
+else {
+    window.addEventListener("load", load);
+}

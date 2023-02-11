@@ -136,6 +136,8 @@ function showMenu(card, dp) {
 			case "Card of Fate Effect":
 			case "Banish Random Card":
 			case "Banish 8 Cards FD":
+			case "Stay Revealed":
+			case "Stop Revealing":
 				option.find('img').attr("src", IMAGES_START + "svg/card_menu_btn_up2.svg");
 				break;
 		}

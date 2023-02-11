@@ -1,7 +1,7 @@
 /* ==UserStyle==
 @name           Better DB User CSS
 @namespace      duelingbook.com
-@version        1.1.0
+@version        1.1.2
 @description    Modernizing duelingbook
 @author         Sock#3222
 @updateURL      https://github.com/LimitlessSocks/DuelingBookUserScripts/raw/main/ModernDB/better-db.user.css
@@ -11,6 +11,7 @@
 @-moz-document domain("duelingbook.com") {
     @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@300;600&family=Heebo:wght@300;700&family=Montserrat:wght@400;700&family=Open+Sans:ital,wght@0,400;0,700;1,400&family=Squada+One&display=swap'); /*' comment to make some syntax highlighters play nice;*/
     
+    .banner-ad, .adsbygoogle { display: none !important; }
     :root {
         --display-font: "Heebo", sans-serif;
         --header-font: "Squada One", "Montserrat", sans-serif;
@@ -175,8 +176,8 @@
     .no_btn::before {
         content: "NO";
     }
-    .page_txt {
-        left: -5px;
+    #search .page_txt {
+        left: -3px;
     }
     #search .page2_txt {
         left: 98px;
