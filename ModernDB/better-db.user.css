@@ -1,7 +1,7 @@
 /* ==UserStyle==
 @name           Better DB User CSS
 @namespace      duelingbook.com
-@version        1.1.2
+@version        1.1.3
 @description    Modernizing duelingbook
 @author         Sock#3222
 @updateURL      https://github.com/LimitlessSocks/DuelingBookUserScripts/raw/main/ModernDB/better-db.user.css
@@ -215,4 +215,7 @@
         padding-top: 10px;
     }
     
+    img.unlimited {
+        display: none !important;
+    }
 }
